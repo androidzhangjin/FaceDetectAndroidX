@@ -3,6 +3,9 @@ package m.tri.facedetectcamera.activity;
 import android.app.AlertDialog;
 import android.content.Context;
 import android.graphics.Bitmap;
+import android.graphics.BitmapFactory;
+import android.graphics.Canvas;
+import android.graphics.Matrix;
 import android.graphics.PointF;
 import android.graphics.Rect;
 import android.graphics.RectF;
@@ -36,6 +39,8 @@ import m.tri.facedetectcamera.utils.CameraErrorCallback;
 import m.tri.facedetectcamera.utils.ImageUtils;
 import m.tri.facedetectcamera.utils.Util;
 
+import static android.graphics.Bitmap.createBitmap;
+
 public class FaceCameraFragment extends Fragment implements SurfaceHolder.Callback, Camera.PreviewCallback {
 
     // Number of Cameras in device.
@@ -54,7 +59,7 @@ public class FaceCameraFragment extends Fragment implements SurfaceHolder.Callba
     private int previewHeight;
 
     // The surface view for the camera data
-    private SurfaceView mView;
+    private SurfaceView surfaceView;
 
     // Draw rectangles and other fancy stuff:
     private FaceOverlayView mFaceView;
@@ -99,7 +104,7 @@ public class FaceCameraFragment extends Fragment implements SurfaceHolder.Callba
         btnChange = rootView.findViewById(R.id.btn_check);
 
 
-        mView = (SurfaceView) rootView.findViewById(R.id.surfaceview);
+        surfaceView = (SurfaceView) rootView.findViewById(R.id.surfaceview);
         getActivity().getWindow().addFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON);
 
         // Now create the OverlayView:
@@ -146,7 +151,7 @@ public class FaceCameraFragment extends Fragment implements SurfaceHolder.Callba
         super.onActivityCreated(savedInstanceState);
 
 
-        SurfaceHolder holder = mView.getHolder();
+        SurfaceHolder holder = surfaceView.getHolder();
         holder.addCallback(this);
 
     }
@@ -214,7 +219,7 @@ public class FaceCameraFragment extends Fragment implements SurfaceHolder.Callba
         }
 
         try {
-            mCamera.setPreviewDisplay(mView.getHolder());
+            mCamera.setPreviewDisplay(surfaceView.getHolder());
         } catch (Exception e) {
             Log.e(TAG, "Could not preview the image.", e);
         }
@@ -349,6 +354,7 @@ public class FaceCameraFragment extends Fragment implements SurfaceHolder.Callba
             isThreadWorking = true;
             waitForFdetThreadComplete();
             detectThread = new FaceDetectThread(handler, getActivity());
+            detectThread.setCamera(_camera);
             detectThread.setData(_data);
             detectThread.start();
         }
@@ -379,6 +385,7 @@ public class FaceCameraFragment extends Fragment implements SurfaceHolder.Callba
         private byte[] data = null;
         private Context ctx;
         private Bitmap faceCropBitmap;
+        private Camera camera;
 
         public FaceDetectThread(Handler handler, Context ctx) {
             this.ctx = ctx;
@@ -401,7 +408,7 @@ public class FaceCameraFragment extends Fragment implements SurfaceHolder.Callba
             bbuffer.get(grayBuff, 0, bufflen);
 
             gray8toRGB32(grayBuff, previewWidth, previewHeight, rgbs);
-            Bitmap bitmap = Bitmap.createBitmap(rgbs, previewWidth, previewHeight, Bitmap.Config.RGB_565);
+            Bitmap bitmap = createBitmap(rgbs, previewWidth, previewHeight, Bitmap.Config.RGB_565);
 
             Bitmap bmp = Bitmap.createScaledBitmap(bitmap, w, h, false);
 
@@ -503,15 +510,25 @@ public class FaceCameraFragment extends Fragment implements SurfaceHolder.Callba
                             // Crop Face to display in RecylerView
                             //
                             if (count == 5) {
-                                faceCropBitmap = ImageUtils.cropFace(faces[i], bitmap, rotate);
-                                if (faceCropBitmap != null) {
-                                    handler.post(new Runnable() {
-                                        public void run() {
-//                                                imagePreviewAdapter.add(faceCropBitmap);
-                                            ivCrop.setImageBitmap(faceCropBitmap);
-                                        }
-                                    });
-                                }
+                                //截图
+                                getPhotoBitmap();
+//                                handler.post(new Runnable() {
+//                                    public void run() {
+//                                        faceCropBitmap = viewToBitmap(surfaceView);
+////                                                imagePreviewAdapter.add(faceCropBitmap);
+//                                        ivCrop.setImageBitmap(faceCropBitmap);
+//                                    }
+//                                });
+
+//                                faceCropBitmap = ImageUtils.cropFace(faces[i], bitmap, rotate);
+//                                if (faceCropBitmap != null) {
+//                                    handler.post(new Runnable() {
+//                                        public void run() {
+////                                                imagePreviewAdapter.add(faceCropBitmap);
+//                                            ivCrop.setImageBitmap(faceCropBitmap);
+//                                        }
+//                                    });
+//                                }
                             }
                         }
                     }
@@ -552,7 +569,39 @@ public class FaceCameraFragment extends Fragment implements SurfaceHolder.Callba
                 ptr++;
             }
         }
+
+        public void setCamera(Camera camera) {
+            this.camera = camera;
+        }
+
+        public void getPhotoBitmap() {
+            camera.takePicture(null, null, new Camera.PictureCallback() {
+                @Override
+                public void onPictureTaken(byte[] data, Camera camera) {
+                    Bitmap bitmap = BitmapFactory.decodeByteArray(data, 0, data.length);
+                    Matrix matrix = new Matrix();
+                    //旋转照片
+                    matrix.setRotate(90);
+//                    matrix.postScale(-1, 1);
+                    bitmap = createBitmap(bitmap, 0, 0, bitmap.getWidth(), bitmap.getHeight(), matrix, true);
+                    final Bitmap finalBitmap = bitmap;
+                    handler.post(new Runnable() {
+                        @Override
+                        public void run() {
+                            ivCrop.setImageBitmap(finalBitmap);
+                        }
+                    });
+//                if (takePhotoCallBack != null) {
+//                    takePhotoCallBack.takePhotoCallBack(bitmap);
+//                }
+                //拍照完成继续
+            startPreview();
+                }
+            });
+        }
     }
+
+
 
     /**
      * Release Memory
@@ -573,5 +622,34 @@ public class FaceCameraFragment extends Fragment implements SurfaceHolder.Callba
         }
     }
 
+    public static Bitmap viewToBitmap(View view) {
+        view.setDrawingCacheEnabled(true);
+        view.measure(
+                View.MeasureSpec.makeMeasureSpec(0, View.MeasureSpec.UNSPECIFIED),
+                View.MeasureSpec.makeMeasureSpec(0, View.MeasureSpec.UNSPECIFIED));
+        view.layout(0, 0, view.getMeasuredWidth(), view.getMeasuredHeight());
+        view.buildDrawingCache(true);
+        Bitmap bitmap = createBitmap(loadBitmapFromView(view));
+
+        if (bitmap != null) {
+            Bitmap.Config cfg = bitmap.getConfig();
+            Log.d("分享", "----------------------- cache.getConfig() = " + cfg);
+        }
+        view.setDrawingCacheEnabled(false);
+        return bitmap;
+    }
+
+
+    private static Bitmap loadBitmapFromView(View v) {
+        if (v == null) {
+            return null;
+        }
+        Bitmap bitmap;
+        bitmap = createBitmap(v.getWidth(), v.getHeight(), Bitmap.Config.ARGB_8888);
+        Canvas c = new Canvas(bitmap);
+        c.translate(-v.getScrollX(), -v.getScrollY());
+        v.draw(c);
+        return bitmap;
+    }
 
 }
