@@ -9,9 +9,12 @@ import android.graphics.Color;
 import android.graphics.Paint;
 import android.graphics.PointF;
 import android.graphics.RectF;
+import android.util.AttributeSet;
 import android.util.DisplayMetrics;
 import android.util.TypedValue;
 import android.view.View;
+
+import androidx.annotation.Nullable;
 
 import java.text.DecimalFormat;
 
@@ -38,6 +41,16 @@ public class FaceOverlayView extends View {
 
     public FaceOverlayView(Context context) {
         super(context);
+        initialize();
+    }
+
+    public FaceOverlayView(Context context, @Nullable AttributeSet attrs) {
+        super(context, attrs);
+        initialize();
+    }
+
+    public FaceOverlayView(Context context, @Nullable AttributeSet attrs, int defStyleAttr) {
+        super(context, attrs, defStyleAttr);
         initialize();
     }
 

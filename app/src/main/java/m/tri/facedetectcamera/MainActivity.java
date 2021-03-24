@@ -15,6 +15,7 @@ import android.widget.Button;
 
 import m.tri.facedetectcamera.activity.FaceDetectGrayActivity;
 import m.tri.facedetectcamera.activity.FaceDetectRGBActivity;
+import m.tri.facedetectcamera.activity.LessonClassActivity;
 import m.tri.facedetectcamera.activity.PhotoDetectActivity;
 
 /**
@@ -56,7 +57,8 @@ public class MainActivity extends AppCompatActivity {
             public void onClick(View v) {
                 int rc = ActivityCompat.checkSelfPermission(mContext, Manifest.permission.CAMERA);
                 if (rc == PackageManager.PERMISSION_GRANTED) {
-                    Intent intent = new Intent(mContext, FaceDetectGrayActivity.class);
+//                  Intent intent = new Intent(mContext, FaceDetectGrayActivity.class);
+                    Intent intent = new Intent(mContext, LessonClassActivity.class);
                     startActivity(intent);
                 } else {
                     requestCameraPermission(RC_HANDLE_CAMERA_PERM_GRAY);
@@ -93,7 +95,8 @@ public class MainActivity extends AppCompatActivity {
         }
 
         if (grantResults.length != 0 && grantResults[0] == PackageManager.PERMISSION_GRANTED && requestCode == RC_HANDLE_CAMERA_PERM_GRAY) {
-            Intent intent = new Intent(mContext, FaceDetectGrayActivity.class);
+//            Intent intent = new Intent(mContext, FaceDetectGrayActivity.class);
+            Intent intent = new Intent(mContext, LessonClassActivity.class);
             startActivity(intent);
             return;
         }

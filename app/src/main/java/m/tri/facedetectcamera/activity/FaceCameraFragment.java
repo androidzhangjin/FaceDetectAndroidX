@@ -9,21 +9,19 @@ import android.graphics.RectF;
 import android.hardware.Camera;
 import android.os.Bundle;
 import android.os.Handler;
-
 import android.util.Log;
-import android.view.Menu;
-import android.view.MenuInflater;
-import android.view.MenuItem;
+import android.view.LayoutInflater;
 import android.view.SurfaceHolder;
 import android.view.SurfaceView;
 import android.view.View;
 import android.view.ViewGroup;
 import android.view.WindowManager;
+import android.widget.Button;
+import android.widget.ImageView;
 
-import androidx.appcompat.app.AppCompatActivity;
-import androidx.recyclerview.widget.DefaultItemAnimator;
-import androidx.recyclerview.widget.LinearLayoutManager;
-import androidx.recyclerview.widget.RecyclerView;
+import androidx.annotation.NonNull;
+import androidx.annotation.Nullable;
+import androidx.fragment.app.Fragment;
 
 import java.nio.ByteBuffer;
 import java.util.ArrayList;
@@ -38,22 +36,12 @@ import m.tri.facedetectcamera.utils.CameraErrorCallback;
 import m.tri.facedetectcamera.utils.ImageUtils;
 import m.tri.facedetectcamera.utils.Util;
 
-
-/**
- * Created by Nguyen on 5/20/2016.
- */
-
-/**
- * FACE DETECT EVERY FRAME WIL CONVERT TO GRAY BITMAP SO THIS HAS HIGHER PERFORMANCE THAN RGB BITMAP
- * COMPARE FPS (DETECT FRAME PER SECOND) OF 2 METHODs FOR MORE DETAIL
- */
-
-public final class FaceDetectGrayActivity extends AppCompatActivity implements SurfaceHolder.Callback, Camera.PreviewCallback {
+public class FaceCameraFragment extends Fragment implements SurfaceHolder.Callback, Camera.PreviewCallback {
 
     // Number of Cameras in device.
     private int numberOfCameras;
 
-    public static final String TAG = FaceDetectGrayActivity.class.getSimpleName();
+    public static final String TAG = "xx";
 
     private Camera mCamera;
     private int cameraId = 0;
@@ -96,36 +84,27 @@ public final class FaceDetectGrayActivity extends AppCompatActivity implements S
 
     //RecylerView face image
     private HashMap<Integer, Integer> facesCount = new HashMap<>();
-    private RecyclerView recyclerView;
+    //      private RecyclerView recyclerView;
     private ImagePreviewAdapter imagePreviewAdapter;
     private ArrayList<Bitmap> facesBitmap;
 
+    Button btnChange;
+    View rootView;
+    ImageView ivCrop;
 
-    //==============================================================================================
-    // Activity Methods
-    //==============================================================================================
-
-    /**
-     * Initializes the UI and initiates the creation of a face detector.
-     */
+    @Nullable
     @Override
-    public void onCreate(Bundle icicle) {
-        super.onCreate(icicle);
+    public View onCreateView(@NonNull LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState) {
+        rootView = inflater.inflate(R.layout.fragment_face_camera, container);
+        btnChange = rootView.findViewById(R.id.btn_check);
 
-        setContentView(R.layout.activity_camera_viewer);
 
-        mView = (SurfaceView) findViewById(R.id.surfaceview);
-        getWindow().addFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON);
+        mView = (SurfaceView) rootView.findViewById(R.id.surfaceview);
+        getActivity().getWindow().addFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON);
 
         // Now create the OverlayView:
-        mFaceView = new FaceOverlayView(this);
-        addContentView(mFaceView, new ViewGroup.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.MATCH_PARENT));
-        // Create and Start the OrientationListener:
-
-        recyclerView = (RecyclerView) findViewById(R.id.recycler_view);
-        RecyclerView.LayoutManager mLayoutManager = new LinearLayoutManager(getApplicationContext());
-        recyclerView.setLayoutManager(mLayoutManager);
-        recyclerView.setItemAnimator(new DefaultItemAnimator());
+        mFaceView = rootView.findViewById(R.id.face_overlay_view);
+        ivCrop = rootView.findViewById(R.id.iv_crop);
 
 
         handler = new Handler();
@@ -137,68 +116,47 @@ public final class FaceDetectGrayActivity extends AppCompatActivity implements S
         }
 
 
-        getSupportActionBar().setDisplayShowTitleEnabled(true);
-        getSupportActionBar().setHomeButtonEnabled(true);
-        getSupportActionBar().setDisplayHomeAsUpEnabled(true);
-        getSupportActionBar().setTitle("Face Detect Gray");
-
-        if (icicle != null)
-            cameraId = icicle.getInt(BUNDLE_CAMERA_ID, 0);
-    }
+        if (savedInstanceState != null)
+            cameraId = savedInstanceState.getInt(BUNDLE_CAMERA_ID, 0);
 
 
-    @Override
-    protected void onPostCreate(Bundle savedInstanceState) {
-        super.onPostCreate(savedInstanceState);
-        // Check for the camera permission before accessing the camera.  If the
-        // permission is not granted yet, request permission.
-        SurfaceHolder holder = mView.getHolder();
-        holder.addCallback(this);
-    }
-
-
-    @Override
-    public boolean onCreateOptionsMenu(Menu menu) {
-        MenuInflater inflater = getMenuInflater();
-        inflater.inflate(R.menu.menu_camera, menu);
-
-        return true;
-    }
-
-    @Override
-    public boolean onOptionsItemSelected(MenuItem item) {
-
-        switch (item.getItemId()) {
-            case android.R.id.home:
-                super.onBackPressed();
-                return true;
-
-            case R.id.switchCam:
-
+        btnChange.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
                 if (numberOfCameras == 1) {
-                    AlertDialog.Builder builder = new AlertDialog.Builder(this);
+                    AlertDialog.Builder builder = new AlertDialog.Builder(getContext());
                     builder.setTitle("Switch Camera").setMessage("Your device have one camera").setNeutralButton("Close", null);
                     AlertDialog alert = builder.create();
                     alert.show();
-                    return true;
                 }
 
                 cameraId = (cameraId + 1) % numberOfCameras;
-                recreate();
-
-                return true;
-
-
-            default:
-                return super.onOptionsItemSelected(item);
-        }
+                getFragmentManager()
+                        .beginTransaction()
+                        .detach(FaceCameraFragment.this)
+                        .attach(FaceCameraFragment.this)
+                        .commit();
+            }
+        });
+        return rootView;
     }
+
+    @Override
+    public void onActivityCreated(@Nullable Bundle savedInstanceState) {
+        super.onActivityCreated(savedInstanceState);
+
+
+        SurfaceHolder holder = mView.getHolder();
+        holder.addCallback(this);
+
+    }
+
 
     /**
      * Restarts the camera.
      */
     @Override
-    protected void onResume() {
+    public void onResume() {
         super.onResume();
 
         Log.i(TAG, "onResume");
@@ -209,7 +167,7 @@ public final class FaceDetectGrayActivity extends AppCompatActivity implements S
      * Stops the camera.
      */
     @Override
-    protected void onPause() {
+    public void onPause() {
         super.onPause();
         Log.i(TAG, "onPause");
         if (mCamera != null) {
@@ -222,14 +180,14 @@ public final class FaceDetectGrayActivity extends AppCompatActivity implements S
      * rest of the processing pipeline.
      */
     @Override
-    protected void onDestroy() {
+    public void onDestroy() {
         super.onDestroy();
         resetData();
     }
 
 
     @Override
-    protected void onSaveInstanceState(Bundle outState) {
+    public void onSaveInstanceState(Bundle outState) {
         super.onSaveInstanceState(outState);
         outState.putInt(BUNDLE_CAMERA_ID, cameraId);
     }
@@ -297,7 +255,7 @@ public final class FaceDetectGrayActivity extends AppCompatActivity implements S
 
     private void setDisplayOrientation() {
         // Now set the display orientation:
-        mDisplayRotation = Util.getDisplayRotation(FaceDetectGrayActivity.this);
+        mDisplayRotation = Util.getDisplayRotation(getActivity());
         mDisplayOrientation = Util.getDisplayOrientation(mDisplayRotation, cameraId);
 
         mCamera.setDisplayOrientation(mDisplayOrientation);
@@ -319,7 +277,7 @@ public final class FaceDetectGrayActivity extends AppCompatActivity implements S
     private void setOptimalPreviewSize(Camera.Parameters cameraParameters, int width, int height) {
         List<Camera.Size> previewSizes = cameraParameters.getSupportedPreviewSizes();
         float targetRatio = (float) width / height;
-        Camera.Size previewSize = Util.getOptimalPreviewSize(this, previewSizes, targetRatio);
+        Camera.Size previewSize = Util.getOptimalPreviewSize(getActivity(), previewSizes, targetRatio);
         previewWidth = previewSize.width;
         previewHeight = previewSize.height;
 
@@ -390,7 +348,7 @@ public final class FaceDetectGrayActivity extends AppCompatActivity implements S
 
             isThreadWorking = true;
             waitForFdetThreadComplete();
-            detectThread = new FaceDetectThread(handler, this);
+            detectThread = new FaceDetectThread(handler, getActivity());
             detectThread.setData(_data);
             detectThread.start();
         }
@@ -420,7 +378,7 @@ public final class FaceDetectGrayActivity extends AppCompatActivity implements S
         private Handler handler;
         private byte[] data = null;
         private Context ctx;
-        private Bitmap faceCroped;
+        private Bitmap faceCropBitmap;
 
         public FaceDetectThread(Handler handler, Context ctx) {
             this.ctx = ctx;
@@ -505,7 +463,7 @@ public final class FaceDetectGrayActivity extends AppCompatActivity implements S
                     /**
                      * Only detect face size > 100x100
                      */
-                    if(rect.height() * rect.width() > 100 * 100) {
+                    if (rect.height() * rect.width() > 100 * 100) {
                         // Check this face and previous face have same ID?
                         for (int j = 0; j < MAX_FACE; j++) {
                             float eyesDisPre = faces_previous[j].eyesDistance();
@@ -545,11 +503,12 @@ public final class FaceDetectGrayActivity extends AppCompatActivity implements S
                             // Crop Face to display in RecylerView
                             //
                             if (count == 5) {
-                                faceCroped = ImageUtils.cropFace(faces[i], bitmap, rotate);
-                                if (faceCroped != null) {
+                                faceCropBitmap = ImageUtils.cropFace(faces[i], bitmap, rotate);
+                                if (faceCropBitmap != null) {
                                     handler.post(new Runnable() {
                                         public void run() {
-                                            imagePreviewAdapter.add(faceCroped);
+//                                                imagePreviewAdapter.add(faceCropBitmap);
+                                            ivCrop.setImageBitmap(faceCropBitmap);
                                         }
                                     });
                                 }
@@ -601,16 +560,18 @@ public final class FaceDetectGrayActivity extends AppCompatActivity implements S
     private void resetData() {
         if (imagePreviewAdapter == null) {
             facesBitmap = new ArrayList<>();
-            imagePreviewAdapter = new ImagePreviewAdapter(FaceDetectGrayActivity.this, facesBitmap, new ImagePreviewAdapter.ViewHolder.OnItemClickListener() {
+            imagePreviewAdapter = new ImagePreviewAdapter(getActivity(), facesBitmap, new ImagePreviewAdapter.ViewHolder.OnItemClickListener() {
                 @Override
                 public void onClick(View v, int position) {
                     imagePreviewAdapter.setCheck(position);
                     imagePreviewAdapter.notifyDataSetChanged();
                 }
             });
-            recyclerView.setAdapter(imagePreviewAdapter);
+//                recyclerView.setAdapter(imagePreviewAdapter);
         } else {
             imagePreviewAdapter.clearAll();
         }
     }
+
+
 }
