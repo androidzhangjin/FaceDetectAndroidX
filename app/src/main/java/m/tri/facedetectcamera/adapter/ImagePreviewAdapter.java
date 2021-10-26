@@ -18,7 +18,7 @@ import java.util.ArrayList;
 import m.tri.facedetectcamera.R;
 
 /**
- * Created by Nguyen on 5/20/2016.
+ * Created by androidZhangjin
  */
 
 

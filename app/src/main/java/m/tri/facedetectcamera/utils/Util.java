@@ -14,7 +14,7 @@ import android.view.Surface;
 import java.util.List;
 
 /**
- * Created by Nguyen on 5/20/2016.
+ * Created by androidZhangjin
  */
 
 public class Util {

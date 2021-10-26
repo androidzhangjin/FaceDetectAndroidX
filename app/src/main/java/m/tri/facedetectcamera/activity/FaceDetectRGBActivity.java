@@ -43,19 +43,9 @@ import m.tri.facedetectcamera.utils.ImageUtils;
 import m.tri.facedetectcamera.utils.Util;
 
 
-/**
- * Created by Nguyen on 5/20/2016.
- */
-
-/**
- * FACE DETECT EVERY FRAME WIL CONVERT TO RGB BITMAP SO THIS HAS LOWER PERFORMANCE THAN GRAY BITMAP
- * COMPARE FPS (DETECT FRAME PER SECOND) OF 2 METHODs FOR MORE DETAIL
- */
-
-
 public final class FaceDetectRGBActivity extends AppCompatActivity implements SurfaceHolder.Callback, Camera.PreviewCallback {
 
-    // Number of Cameras in device.
+   //设备相机的数量
     private int numberOfCameras;
 
     public static final String TAG = FaceDetectRGBActivity.class.getSimpleName();
@@ -63,7 +53,7 @@ public final class FaceDetectRGBActivity extends AppCompatActivity implements Su
     private Camera mCamera;
     private int cameraId = 0;
 
-    // Let's keep track of the display rotation and orientation also:
+
     private int mDisplayRotation;
     private int mDisplayOrientation;
 

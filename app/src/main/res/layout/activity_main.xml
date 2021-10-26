@@ -23,7 +23,7 @@
                 android:id="@+id/textView"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:text="Detect face from live Camera:"
+                android:text="从相机中识别人脸"
                 android:textAppearance="?android:attr/textAppearanceMedium" />
 
             <Button
@@ -46,6 +46,7 @@
                 android:layout_height="wrap_content"
                 android:layout_marginTop="@dimen/activity_vertical_margin"
                 android:text="Detect face from Image Bitmap:"
+                android:visibility="gone"
                 android:textAppearance="?android:attr/textAppearanceMedium" />
 
             <Button

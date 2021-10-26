@@ -15,11 +15,7 @@ import android.widget.Button;
 
 import m.tri.facedetectcamera.activity.FaceDetectGrayActivity;
 import m.tri.facedetectcamera.activity.FaceDetectRGBActivity;
-import m.tri.facedetectcamera.activity.PhotoDetectActivity;
 
-/**
- * Created by Nguyen on 5/20/2016.
- */
 
 public class MainActivity extends AppCompatActivity {
 
@@ -64,14 +60,14 @@ public class MainActivity extends AppCompatActivity {
             }
         });
 
-        Button btnPhoto = (Button) findViewById(R.id.btnImage);
-        btnPhoto.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                Intent intent = new Intent(mContext, PhotoDetectActivity.class);
-                startActivity(intent);
-            }
-        });
+//        Button btnPhoto = (Button) findViewById(R.id.btnImage);
+//        btnPhoto.setOnClickListener(new View.OnClickListener() {
+//            @Override
+//            public void onClick(View v) {
+//                Intent intent = new Intent(mContext, PhotoDetectActivity.class);
+//                startActivity(intent);
+//            }
+//        });
     }
 
 

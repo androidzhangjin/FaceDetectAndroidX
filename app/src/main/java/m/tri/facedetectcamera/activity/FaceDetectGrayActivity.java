@@ -40,14 +40,9 @@ import m.tri.facedetectcamera.utils.Util;
 
 
 /**
- * Created by Nguyen on 5/20/2016.
+ * 人脸检测每一帧都将转换为灰度位图，因此这比RGB位图具有更高的性能
+ * 比较两种方法的FPS
  */
-
-/**
- * FACE DETECT EVERY FRAME WIL CONVERT TO GRAY BITMAP SO THIS HAS HIGHER PERFORMANCE THAN RGB BITMAP
- * COMPARE FPS (DETECT FRAME PER SECOND) OF 2 METHODs FOR MORE DETAIL
- */
-
 public final class FaceDetectGrayActivity extends AppCompatActivity implements SurfaceHolder.Callback, Camera.PreviewCallback {
 
     // Number of Cameras in device.

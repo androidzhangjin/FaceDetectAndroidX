@@ -31,14 +31,8 @@ import m.tri.facedetectcamera.adapter.ImagePreviewAdapter;
 import m.tri.facedetectcamera.model.FaceResult;
 import m.tri.facedetectcamera.utils.ImageUtils;
 
-
 /**
- * Created by Nguyen on 5/20/2016.
- */
-
-/**
- * Demonstrates basic usage of the GMS vision face detector by running face landmark detection on a
- * photo and displaying the photo with associated landmarks in the UI.
+ * GMS 版本人脸检测器
  */
 public class PhotoDetectActivity extends AppCompatActivity {
 
