@@ -45,7 +45,7 @@ import m.tri.facedetectcamera.utils.Util;
  */
 public final class FaceDetectGrayActivity extends AppCompatActivity implements SurfaceHolder.Callback, Camera.PreviewCallback {
 
-    // Number of Cameras in device.
+
     private int numberOfCameras;
 
     public static final String TAG = FaceDetectGrayActivity.class.getSimpleName();
