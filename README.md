@@ -1,5 +1,6 @@
 # FaceDetectAndroidX
 [中文版](README.zh-cn.md)
+
 Face detect demo for AndroidX in java.It can open camera and fetch face 。
 
 Display camera in SurfaceView.
