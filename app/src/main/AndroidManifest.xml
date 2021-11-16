@@ -23,7 +23,7 @@
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
-
+        <!--fullSensor可以有四个方向  -->
         <activity
             android:name=".activity.FaceDetectGrayActivity"
             android:screenOrientation="fullSensor" />

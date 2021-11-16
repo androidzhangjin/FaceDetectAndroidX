@@ -53,20 +53,20 @@ public final class FaceDetectGrayActivity extends AppCompatActivity implements S
     private Camera mCamera;
     private int cameraId = 0;
 
-    // Let's keep track of the display rotation and orientation also:
+
     private int mDisplayRotation;
     private int mDisplayOrientation;
 
     private int previewWidth;
     private int previewHeight;
 
-    // The surface view for the camera data
+    //使用SurfaceView
     private SurfaceView mView;
 
-    // Draw rectangles and other fancy stuff:
+    //绿色矩形框
     private FaceOverlayView mFaceView;
 
-    // Log all errors:
+    //显示Log错误
     private final CameraErrorCallback mErrorCallback = new CameraErrorCallback();
 
 
@@ -89,20 +89,12 @@ public final class FaceDetectGrayActivity extends AppCompatActivity implements S
     private String BUNDLE_CAMERA_ID = "camera";
 
 
-    //RecylerView face image
     private HashMap<Integer, Integer> facesCount = new HashMap<>();
     private RecyclerView recyclerView;
     private ImagePreviewAdapter imagePreviewAdapter;
     private ArrayList<Bitmap> facesBitmap;
 
 
-    //==============================================================================================
-    // Activity Methods
-    //==============================================================================================
-
-    /**
-     * Initializes the UI and initiates the creation of a face detector.
-     */
     @Override
     public void onCreate(Bundle icicle) {
         super.onCreate(icicle);
@@ -112,10 +104,9 @@ public final class FaceDetectGrayActivity extends AppCompatActivity implements S
         mView = (SurfaceView) findViewById(R.id.surfaceview);
         getWindow().addFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON);
 
-        // Now create the OverlayView:
+
         mFaceView = new FaceOverlayView(this);
         addContentView(mFaceView, new ViewGroup.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.MATCH_PARENT));
-        // Create and Start the OrientationListener:
 
         recyclerView = (RecyclerView) findViewById(R.id.recycler_view);
         RecyclerView.LayoutManager mLayoutManager = new LinearLayoutManager(getApplicationContext());
@@ -145,8 +136,6 @@ public final class FaceDetectGrayActivity extends AppCompatActivity implements S
     @Override
     protected void onPostCreate(Bundle savedInstanceState) {
         super.onPostCreate(savedInstanceState);
-        // Check for the camera permission before accessing the camera.  If the
-        // permission is not granted yet, request permission.
         SurfaceHolder holder = mView.getHolder();
         holder.addCallback(this);
     }
@@ -189,9 +178,7 @@ public final class FaceDetectGrayActivity extends AppCompatActivity implements S
         }
     }
 
-    /**
-     * Restarts the camera.
-     */
+
     @Override
     protected void onResume() {
         super.onResume();
@@ -200,9 +187,6 @@ public final class FaceDetectGrayActivity extends AppCompatActivity implements S
         startPreview();
     }
 
-    /**
-     * Stops the camera.
-     */
     @Override
     protected void onPause() {
         super.onPause();
@@ -212,10 +196,7 @@ public final class FaceDetectGrayActivity extends AppCompatActivity implements S
         }
     }
 
-    /**
-     * Releases the resources associated with the camera source, the associated detector, and the
-     * rest of the processing pipeline.
-     */
+
     @Override
     protected void onDestroy() {
         super.onDestroy();
@@ -259,11 +240,10 @@ public final class FaceDetectGrayActivity extends AppCompatActivity implements S
 
     @Override
     public void surfaceChanged(SurfaceHolder surfaceHolder, int format, int width, int height) {
-        // We have no surface, return immediately:
         if (surfaceHolder.getSurface() == null) {
             return;
         }
-        // Try to stop the current preview:
+     //停止当前的预览
         try {
             mCamera.stopPreview();
         } catch (Exception e) {
@@ -274,7 +254,7 @@ public final class FaceDetectGrayActivity extends AppCompatActivity implements S
         setDisplayOrientation();
         setErrorCallback();
 
-        // Create media.FaceDetector
+
         float aspect = (float) previewHeight / (float) previewWidth;
         fdet = new android.media.FaceDetector(prevSettingWidth, (int) (prevSettingWidth * aspect), MAX_FACE);
 
@@ -282,7 +262,6 @@ public final class FaceDetectGrayActivity extends AppCompatActivity implements S
         grayBuff = new byte[bufflen];
         rgbs = new int[bufflen];
 
-        // Everything is configured! Finally start the camera preview again:
         startPreview();
     }
 
@@ -408,9 +387,6 @@ public final class FaceDetectGrayActivity extends AppCompatActivity implements S
     }
 
 
-    /**
-     * Do face detect in thread
-     */
     private class FaceDetectThread extends Thread {
         private Handler handler;
         private byte[] data = null;
